@@ -1,8 +1,7 @@
 import { Item, Button } from "./index";
 import PropTypes from "prop-types";
 
-function Contacts(p) {
-  const { contacts, filter, onDelete } = p;
+function Contacts({ contacts, filter, onDelete }) {
   const emptyFilter = filter.trim() === "";
   const lowCaseFilter = filter.toLowerCase();
 

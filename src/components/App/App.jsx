@@ -1,66 +1,46 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import Form from "../Form";
 import Filter from "../Filter";
 import ContactList from "../ContactList";
 import { v4 as uuidv4 } from "uuid";
 import { Container, Title, SecondaryTitle } from "./index";
 
-class App extends Component {
-  state = {
-    contacts: [
-      //     {id: 'id-1', name: 'Rosie Simpson', number: '459-12-56'},
-      // {id: 'id-2', name: 'Hermione Kline', number: '443-89-12'},
-      // {id: 'id-3', name: 'Eden Clements', number: '645-17-79'},
-      // {id: 'id-4', name: 'Annie Copeland', number: '227-91-26'},
-    ],
-    filter: "",
-  };
+function App() {
+  const [name, setName] = useState("");
+  const [number, setNumber] = useState("");
+  const [contacts, setContacts] = useState([]);
+  const [filter, setFilter] = useState("");
 
-  componentDidMount() {
-    if (localStorage.length === 0) {
-      this.setInitialValue();
-    } else {
-      this.getDataFromLocalStorage();
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.contacts !== this.state.contacts) {
-      this.setLocalStorageData();
-    }
-  }
-
-  setInitialValue() {
-    return localStorage.setItem("contacts", JSON.stringify([]));
-  }
-
-  setLocalStorageData() {
-    return localStorage.setItem(
-      "contacts",
-      JSON.stringify([...this.state.contacts])
-    );
-  }
-
-  getDataFromLocalStorage() {
+  useEffect(() => {
     const data = JSON.parse(localStorage.getItem("contacts"));
-    this.setState((state) => ({ contacts: state.contacts.concat([...data]) }));
+    localStorage.length !== 0
+      ? setContacts([...data])
+      : localStorage.setItem("contacts", JSON.stringify([]));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("contacts", JSON.stringify([...contacts]));
+  }, [contacts]);
+
+  function handleInputValue(e) {
+    switch (e.target.name) {
+      case "name":
+        return setName(e.target.value);
+
+      case "number":
+        return setNumber(e.target.value);
+
+      case "filter":
+        return setFilter(e.target.value);
+
+      default:
+        return;
+    }
   }
 
-  handleInputValue = (e) => {
-    const { value, name } = e.target;
-    this.setState({ [name]: value });
-  };
-
-  handleDelete = (e) => {
-    this.setState({
-      contacts: this.state.contacts.filter((el) => el.id !== e.target.id),
-    });
-  };
-
-  handleSubmit = (e) => {
+  function handleSubmit(e) {
     e.preventDefault();
 
-    const { contacts, name, number } = this.state;
     const { inputName, inputNumber } = e.target;
     const foundEl = contacts.find(
       (el) => el.name.toLowerCase() === name.toLowerCase()
@@ -72,36 +52,34 @@ class App extends Component {
       alert(`${name} is already in your contacts!`);
     } else {
       const contact = { id: uuidv4(), name, number };
-      this.setState((prevState) => ({
-        contacts: prevState.contacts.concat(contact),
-      }));
+      setContacts(contacts.concat(contact));
     }
-  };
-
-  render() {
-    const { contacts, filter } = this.state;
-
-    return (
-      <>
-        <Container>
-          <Title>Phonebook</Title>
-          <Form onChange={this.handleInputValue} onSubmit={this.handleSubmit} />
-        </Container>
-
-        {contacts.length > 0 && (
-          <Container>
-            <SecondaryTitle>Contacts</SecondaryTitle>
-            <Filter onChange={this.handleInputValue} />
-            <ContactList
-              onDelete={this.handleDelete}
-              contacts={contacts}
-              filter={filter}
-            />
-          </Container>
-        )}
-      </>
-    );
   }
+
+  function handleDelete(e) {
+    setContacts(contacts.filter((el) => el.id !== e.target.id));
+  }
+
+  return (
+    <>
+      <Container>
+        <Title>Phonebook</Title>
+        <Form onChange={handleInputValue} onSubmit={handleSubmit} />
+      </Container>
+
+      {contacts.length > 0 && (
+        <Container>
+          <SecondaryTitle>Contacts</SecondaryTitle>
+          <Filter onChange={handleInputValue} />
+          <ContactList
+            onDelete={handleDelete}
+            contacts={contacts}
+            filter={filter}
+          />
+        </Container>
+      )}
+    </>
+  );
 }
 
 export default App;

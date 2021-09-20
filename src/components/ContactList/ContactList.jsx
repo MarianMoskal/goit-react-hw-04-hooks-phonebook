@@ -1,9 +1,7 @@
 import Contacts from "../Contacts";
 import PropTypes from "prop-types";
 
-function ContactList(p) {
-  const { contacts, filter, onDelete } = p;
-
+function ContactList({ contacts, filter, onDelete }) {
   return (
     <>
       <ol>
